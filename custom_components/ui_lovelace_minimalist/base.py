@@ -5,7 +5,7 @@ from dataclasses import asdict, dataclass, field
 import logging
 import os
 import pathlib
-import shutil
+import aioshutil
 from typing import Any, Awaitable, Callable
 
 from aiogithubapi import (
@@ -240,7 +240,7 @@ class UlmBase:
             not self.configuration.community_cards_enabled
             or self.configuration.community_cards == []
         ):
-            shutil.rmtree(f"{self.community_cards_dir}/", ignore_errors=True)
+            aioshutil.rmtree(f"{self.community_cards_dir}/", ignore_errors=True)
         elif self.configuration.community_cards_enabled:
             existing_cards = [
                 f.path for f in os.scandir(self.community_cards_dir) if f.is_dir()
@@ -252,12 +252,12 @@ class UlmBase:
                     self.log.debug(
                         f"Deleting community card folder {card_dir}, not selected anymore."
                     )
-                    shutil.rmtree(e, ignore_errors=True)
+                    aioshutil.rmtree(e, ignore_errors=True)
                 if card_dir not in self.configuration.all_community_cards:
                     self.log.debug(
                         f"Deleting community card folder {card_dir}, that is not existing anymore on Github."
                     )
-                    shutil.rmtree(e, ignore_errors=True)
+                    aioshutil.rmtree(e, ignore_errors=True)
 
             for card in self.configuration.community_cards:
                 if card not in self.configuration.all_community_cards:
@@ -417,10 +417,10 @@ class UlmBase:
         try:
 
             # Cleanup
-            shutil.rmtree(
+            aioshutil.rmtree(
                 self.hass.config.path(f"{DOMAIN}/configs"), ignore_errors=True
             )
-            shutil.rmtree(self.hass.config.path(f"{DOMAIN}/addons"), ignore_errors=True)
+            aioshutil.rmtree(self.hass.config.path(f"{DOMAIN}/addons"), ignore_errors=True)
             # Create config dir
             os.makedirs(self.hass.config.path(f"{DOMAIN}/dashboard"), exist_ok=True)
             os.makedirs(self.hass.config.path(f"{DOMAIN}/custom_cards"), exist_ok=True)
@@ -435,7 +435,7 @@ class UlmBase:
                 language = LANGUAGES[self.configuration.language]
 
                 # Copy default language file over to config dir
-                shutil.copy2(
+                aioshutil.copy2(
                     f"{self.integration_dir}/lovelace/translations/default.yaml",
                     f"{self.templates_dir}/default.yaml",
                 )
@@ -444,7 +444,7 @@ class UlmBase:
                     if not os.path.exists(
                         self.hass.config.path(f"{DOMAIN}/dashboard/ui-lovelace.yaml")
                     ):
-                        shutil.copy2(
+                        aioshutil.copy2(
                             f"{self.integration_dir}/lovelace/ui-lovelace.yaml",
                             self.hass.config.path(
                                 f"{DOMAIN}/dashboard/ui-lovelace.yaml"
@@ -455,7 +455,7 @@ class UlmBase:
                     if not os.path.exists(
                         self.hass.config.path(f"{DOMAIN}/dashboard/adaptive-dash")
                     ):
-                        shutil.copytree(
+                        aioshutil.copytree(
                             f"{self.integration_dir}/lovelace/adaptive-dash",
                             self.hass.config.path(f"{DOMAIN}/dashboard/adaptive-dash"),
                         )
@@ -465,37 +465,37 @@ class UlmBase:
                         f"{DOMAIN}/custom_actions/custom_actions.yaml"
                     )
                 ):
-                    shutil.copy2(
+                    aioshutil.copy2(
                         f"{self.integration_dir}/lovelace/custom_actions.yaml",
                         self.hass.config.path(
                             f"{DOMAIN}/custom_actions/custom_actions.yaml"
                         ),
                     )
                 # Copy chosen language file over to config dir
-                shutil.copy2(
+                aioshutil.copy2(
                     f"{self.integration_dir}/lovelace/translations/{language}.yaml",
                     f"{self.templates_dir}/language.yaml",
                 )
                 # Copy over cards from integration
-                shutil.copytree(
+                aioshutil.copytree(
                     f"{self.integration_dir}/lovelace/ulm_templates",
                     f"{self.templates_dir}",
                     dirs_exist_ok=True,
                 )
                 # Copy over manually installed custom_cards from user
-                shutil.copytree(
+                aioshutil.copytree(
                     self.hass.config.path(f"{DOMAIN}/custom_cards"),
                     f"{self.templates_dir}/custom_cards",
                     dirs_exist_ok=True,
                 )
                 # Copy over manually installed custom_actions from user
-                shutil.copytree(
+                aioshutil.copytree(
                     self.hass.config.path(f"{DOMAIN}/custom_actions"),
                     f"{self.templates_dir}/custom_actions",
                     dirs_exist_ok=True,
                 )
                 # Copy over themes to defined themes folder
-                shutil.copytree(
+                aioshutil.copytree(
                     f"{self.integration_dir}/lovelace/themefiles",
                     self.hass.config.path(f"{self.configuration.theme_path}/"),
                     dirs_exist_ok=True,
@@ -522,14 +522,14 @@ class UlmBase:
         """Reload Configuration."""
         if os.path.exists(self.hass.config.path(f"{DOMAIN}/custom_cards")):
             # Copy over manually installed custom_cards from user
-            shutil.copytree(
+            aioshutil.copytree(
                 self.hass.config.path(f"{DOMAIN}/custom_cards"),
                 f"{self.templates_dir}/custom_cards",
                 dirs_exist_ok=True,
             )
         if os.path.exists(self.hass.config.path(f"{DOMAIN}/custom_actions")):
             # Copy over manually installed custom_actions from user
-            shutil.copytree(
+            aioshutil.copytree(
                 self.hass.config.path(f"{DOMAIN}/custom_actions"),
                 f"{self.templates_dir}/custom_actions",
                 dirs_exist_ok=True,
